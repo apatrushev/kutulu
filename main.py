@@ -1,17 +1,22 @@
 import sys
 import math
-stream = sys.stdin
-if len(sys.argv) > 1:
-    stream = open(sys.argv[1])
+
+
+stream = None if len(sys.argv) < 2 else open(sys.argv[1])
+def inputr():
+    if len(sys.argv) > 1:
+        return stream.readline().strip()
+    return input()
+
 
 class Entity:
     def __init__(self, id_, x, y, param_0, param_1, param_2):
-        self.id = int(id_)
-        self.x = int(x)
-        self.y = int(y)
-        self.param_0 = int(param_0)
-        self.param_1 = int(param_1)
-        self.param_2 = int(param_2)
+        self.id = id_
+        self.x = x
+        self.y = y
+        self.param_0 = param_0
+        self.param_1 = param_1
+        self.param_2 = param_2
 
 
 class Explorer(Entity):
@@ -19,8 +24,13 @@ class Explorer(Entity):
         super().__init__(id_, x, y, param_0, param_1, param_2)
         self.sanity = self.param_0
 
-    def move_to(self, wanderer):
-        return RIGHT_LOWER
+    def move_to(self, wanderers, explorers):
+        # Write an action using print
+        # To debug: print("Debug messages...", file=sys.stderr)
+        # my_wanderers.sort(key=lambda x: x.distance_to_target)
+
+        # MOVE <x> <y> | WAIT
+        return sum(e.x for e in explorers)//3, sum(e.y for e in explorers)//3
 
 
 class Wanderer(Entity):
@@ -60,8 +70,8 @@ def create_entity(entity_type, id_, x, y, param_0, param_1, param_2):
 # Survive the wrath of Kutulu
 # Coded fearlessly by JohnnyYuge & nmahoude (ok we might have been a bit scared by the old god...but don't say anything)
 
-width = int(stream.readline().strip())
-height = int(stream.readline().strip())
+width = int(inputr())
+height = int(inputr())
 print(width, file=sys.stderr)
 print(height, file=sys.stderr)
 
@@ -70,29 +80,28 @@ LEFT_LOWER = "0 {}".format(height)
 RIGHT_UPPER = "{} 0".format(width)
 RIGHT_LOWER = "{} {}".format(width, height)
 
-field = [stream.readline().strip() for i in range(height)]
+field = [inputr() for i in range(height)]
 for l in field:
     print(l, file=sys.stderr)
 # sanity_loss_lonely: how much sanity you lose every turn when alone, always 3 until wood 1
 # sanity_loss_group: how much sanity you lose every turn when near another player, always 1 until wood 1
 # wanderer_spawn_time: how many turns the wanderer take to spawn, always 3 until wood 1
 # wanderer_life_time: how many turns the wanderer is on map after spawning, always 40 until wood 1
-sanity_loss_lonely, sanity_loss_group, wanderer_spawn_time, wanderer_life_time = [int(i) for i in stream.readline().strip().split()]
+sanity_loss_lonely, sanity_loss_group, wanderer_spawn_time, wanderer_life_time = [int(i) for i in inputr().split()]
 print(sanity_loss_lonely, sanity_loss_group, wanderer_spawn_time, wanderer_life_time, file=sys.stderr)
 # game loop
 while True:
     # print(field, file=sys.stderr)
-    entity_count = int(stream.readline().strip())  # the first given entity corresponds to your explorer
+    entity_count = int(inputr())  # the first given entity corresponds to your explorer
     print(entity_count, file=sys.stderr)
     entities = []
     for i in range(entity_count):
-        entity_type, *params = stream.readline().strip().split()
+        entity_type, *params = inputr().split()
         print(entity_type, *params, file=sys.stderr)
         id_, x, y, param_0, param_1, param_2 = list(map(int, params))
         entities.append(
             create_entity(entity_type, id_, x, y, param_0, param_1, param_2)
         )
-    print(entities)
     entities_map = {e.id: e for e in entities}
     i_am, entities = entities[0], entities[1:]
 
@@ -110,14 +119,7 @@ while True:
         if isinstance(entity, Explorer):
             explorers.append(entity)
 
-    # Write an action using print
-    # To debug: print("Debug messages...", file=sys.stderr)
-    my_wanderers.sort(key=lambda x: x.distance_to_target)
-
-    # MOVE <x> <y> | WAIT
-    import pdb; pdb.set_trace()
-    if len(my_wanderers):
-        move_to = i_am.move_to(my_wanderers[0])
-        print("MOVE {}".format(move_to))
-    else:
-        print("WAIT")
+    if len(sys.argv) > 1:
+        import pdb; pdb.set_trace()
+    move_to = i_am.move_to(my_wanderers, explorers)
+    print("MOVE {} {}".format(*move_to))
