@@ -1,6 +1,8 @@
 import sys
 import math
-
+stream = sys.stdin
+if len(sys.argv) > 1:
+    stream = open(sys.argv[1])
 
 class Entity:
     def __init__(self, id_, x, y, param_0, param_1, param_2):
@@ -58,8 +60,8 @@ def create_entity(entity_type, id_, x, y, param_0, param_1, param_2):
 # Survive the wrath of Kutulu
 # Coded fearlessly by JohnnyYuge & nmahoude (ok we might have been a bit scared by the old god...but don't say anything)
 
-width = int(input())
-height = int(input())
+width = int(stream.readline().strip())
+height = int(stream.readline().strip())
 print(width, file=sys.stderr)
 print(height, file=sys.stderr)
 
@@ -68,21 +70,23 @@ LEFT_LOWER = "0 {}".format(height)
 RIGHT_UPPER = "{} 0".format(width)
 RIGHT_LOWER = "{} {}".format(width, height)
 
-field = [input() for i in range(height)]
-print(field, file=sys.stderr)
+field = [stream.readline().strip() for i in range(height)]
+for l in field:
+    print(l, file=sys.stderr)
 # sanity_loss_lonely: how much sanity you lose every turn when alone, always 3 until wood 1
 # sanity_loss_group: how much sanity you lose every turn when near another player, always 1 until wood 1
 # wanderer_spawn_time: how many turns the wanderer take to spawn, always 3 until wood 1
 # wanderer_life_time: how many turns the wanderer is on map after spawning, always 40 until wood 1
-sanity_loss_lonely, sanity_loss_group, wanderer_spawn_time, wanderer_life_time = [int(i) for i in input().split()]
+sanity_loss_lonely, sanity_loss_group, wanderer_spawn_time, wanderer_life_time = [int(i) for i in stream.readline().strip().split()]
 print(sanity_loss_lonely, sanity_loss_group, wanderer_spawn_time, wanderer_life_time, file=sys.stderr)
 # game loop
 while True:
     # print(field, file=sys.stderr)
-    entity_count = int(input())  # the first given entity corresponds to your explorer
+    entity_count = int(stream.readline().strip())  # the first given entity corresponds to your explorer
+    print(entity_count, file=sys.stderr)
     entities = []
     for i in range(entity_count):
-        entity_type, *params = input().split()
+        entity_type, *params = stream.readline().strip().split()
         print(entity_type, *params, file=sys.stderr)
         id_, x, y, param_0, param_1, param_2 = list(map(int, params))
         entities.append(
@@ -111,6 +115,7 @@ while True:
     my_wanderers.sort(key=lambda x: x.distance_to_target)
 
     # MOVE <x> <y> | WAIT
+    import pdb; pdb.set_trace()
     if len(my_wanderers):
         move_to = i_am.move_to(my_wanderers[0])
         print("MOVE {}".format(move_to))
