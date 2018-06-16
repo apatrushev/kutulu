@@ -3,9 +3,8 @@ import math
 
 
 class Entity:
-    def __init__(self, entity_type, id, x, y, param_0, param_1, param_2):
-        self.entity_type = entity_type
-        self.id = int(id)
+    def __init__(self, id_, x, y, param_0, param_1, param_2):
+        self.id = int(id_)
         self.x = int(x)
         self.y = int(y)
         self.param_0 = int(param_0)
@@ -14,9 +13,8 @@ class Entity:
 
 
 class Explorer(Entity):
-    def __init__(self, entity_type, id, x, y, param_0, param_1, param_2):
-        super().__init__(entity_type, id, x, y, param_0, param_1, param_2)
-
+    def __init__(self, id_, x, y, param_0, param_1, param_2):
+        super().__init__(id_, x, y, param_0, param_1, param_2)
         self.sanity = self.param_0
 
     def move_to(self, wanderer):
@@ -24,9 +22,8 @@ class Explorer(Entity):
 
 
 class Wanderer(Entity):
-    def __init__(self, entity_type, id, x, y, param_0, param_1, param_2):
-        super().__init__(entity_type, id, x, y, param_0, param_1, param_2)
-
+    def __init__(self, id_, x, y, param_0, param_1, param_2):
+        super().__init__(id_, x, y, param_0, param_1, param_2)
         self.time_before_spawn_recalled = self.param_0
         self.state = self.param_1
         self.target = self.param_2
@@ -50,8 +47,8 @@ class Wanderer(Entity):
         return abs(self.target_entity.x - self.x) + abs(self.target_entity.y - self.y)
 
 
-def create_entity(entity_type, id, x, y, param_0, param_1, param_2):
-    args = entity_type, id, x, y, param_0, param_1, param_2
+def create_entity(entity_type, id_, x, y, param_0, param_1, param_2):
+    args = id_, x, y, param_0, param_1, param_2
     if entity_type == 'EXPLORER':
         return Explorer(*args)
     elif entity_type == 'WANDERER':
@@ -63,38 +60,35 @@ def create_entity(entity_type, id, x, y, param_0, param_1, param_2):
 
 width = int(input())
 height = int(input())
+print(width, file=sys.stderr)
+print(height, file=sys.stderr)
 
 LEFT_UPPER = "0 0"
 LEFT_LOWER = "0 {}".format(height)
 RIGHT_UPPER = "{} 0".format(width)
 RIGHT_LOWER = "{} {}".format(width, height)
 
-field = []
-for i in range(height):
-    line = input()
-    field.append(list(line))
+field = [input() for i in range(height)]
+print(field, file=sys.stderr)
 # sanity_loss_lonely: how much sanity you lose every turn when alone, always 3 until wood 1
 # sanity_loss_group: how much sanity you lose every turn when near another player, always 1 until wood 1
 # wanderer_spawn_time: how many turns the wanderer take to spawn, always 3 until wood 1
 # wanderer_life_time: how many turns the wanderer is on map after spawning, always 40 until wood 1
 sanity_loss_lonely, sanity_loss_group, wanderer_spawn_time, wanderer_life_time = [int(i) for i in input().split()]
-
+print(sanity_loss_lonely, sanity_loss_group, wanderer_spawn_time, wanderer_life_time, file=sys.stderr)
 # game loop
 while True:
     # print(field, file=sys.stderr)
     entity_count = int(input())  # the first given entity corresponds to your explorer
     entities = []
     for i in range(entity_count):
-        entity_type, id, x, y, param_0, param_1, param_2 = input().split()
-        id = int(id)
-        x = int(x)
-        y = int(y)
-        param_0 = int(param_0)
-        param_1 = int(param_1)
-        param_2 = int(param_2)
+        entity_type, *params = input().split()
+        print(entity_type, *params, file=sys.stderr)
+        id_, x, y, param_0, param_1, param_2 = list(map(int, params))
         entities.append(
-            create_entity(entity_type, id, x, y, param_0, param_1, param_2)
+            create_entity(entity_type, id_, x, y, param_0, param_1, param_2)
         )
+    print(entities)
     entities_map = {e.id: e for e in entities}
     i_am, entities = entities[0], entities[1:]
 
